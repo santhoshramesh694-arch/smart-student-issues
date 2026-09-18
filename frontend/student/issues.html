@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Issues | Student Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div>
+            <h3 class="fw-bold text-dark mb-1">My Reported Issues</h3>
+            <p class="text-secondary small mb-0">Search, filter, and track status updates for all your submitted tickets.</p>
+          </div>
+          <a href="/student/create-issue.html" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+            <i class="fa-solid fa-plus-circle me-2"></i>Report New Issue
+          </a>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="card-custom p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+              <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-search"></i></span>
+                <input type="text" class="form-control border-start-0" id="search-input" placeholder="Search title, tracking code, or room...">
+              </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="status-filter">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="assigned">Assigned</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="priority-filter">
+                <option value="">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="category-filter">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2 text-end">
+              <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                <i class="fa-solid fa-rotate-left me-1"></i>Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issues List Table -->
+        <div class="card-custom">
+          <div class="table-responsive">
+            <table class="table table-custom">
+              <thead>
+                <tr>
+                  <th>Tracking Code</th>
+                  <th>Category</th>
+                  <th>Issue Details</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned Staff</th>
+                  <th>Reported Date</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="issues-table-body">
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted small">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Loading issues...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2" id="pagination-wrapper">
+            <div class="small text-muted" id="pagination-info">Showing 0 of 0 records</div>
+            <ul class="pagination pagination-sm mb-0" id="pagination-controls"></ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    let currentPage = 1;
+
+    if (Auth.requireAuth(['student'])) {
+      Components.renderLayout('issues');
+      loadCategories();
+      loadIssues();
+      setupEventListeners();
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await apiCall('/categories');
+        const select = document.getElementById('category-filter');
+        res.data.categories.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.name;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function setupEventListeners() {
+      let debounceTimeout;
+      document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          currentPage = 1;
+          loadIssues();
+        }, 350);
+      });
+
+      document.getElementById('status-filter').addEventListener('change', () => {
+        currentPage = 1;
+        loadIssues();
+      });
+
+      document.getElementById('priority-filter').addEventListener('change', () => {
+        currentPage = 1;
+        loadIssues();
+      });
+
+      document.getElementById('category-filter').addEventListener('change', () => {
+        currentPage = 1;
+        loadIssues();
+      });
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('status-filter').value = '';
+      document.getElementById('priority-filter').value = '';
+      document.getElementById('category-filter').value = '';
+      currentPage = 1;
+      loadIssues();
+    }
+
+    async function loadIssues() {
+      const search = document.getElementById('search-input').value.trim();
+      const status = document.getElementById('status-filter').value;
+      const priority = document.getElementById('priority-filter').value;
+      const category_id = document.getElementById('category-filter').value;
+
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 8
+      });
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      if (priority) params.append('priority', priority);
+      if (category_id) params.append('category_id', category_id);
+
+      try {
+        const res = await apiCall(`/issues?${params.toString()}`);
+        const { issues, pagination } = res.data;
+        const tbody = document.getElementById('issues-table-body');
+
+        if (!issues || issues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8">${UI.renderEmptyState('No issues matched your filter criteria')}</td></tr>`;
+          document.getElementById('pagination-info').textContent = 'Showing 0 records';
+          document.getElementById('pagination-controls').innerHTML = '';
+          return;
+        }
+
+        tbody.innerHTML = issues.map(iss => `
+          <tr>
+            <td>
+              <span class="fw-bold font-monospace text-primary">${UI.escapeHTML(iss.tracking_code)}</span>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                <i class="fa-solid ${UI.escapeHTML(iss.category_icon || 'fa-wrench')} me-1 text-primary"></i>
+                ${UI.escapeHTML(iss.category_name)}
+              </span>
+            </td>
+            <td>
+              <div class="fw-bold text-dark">${UI.escapeHTML(iss.title)}</div>
+              <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i>${UI.escapeHTML(iss.location)} (${UI.escapeHTML(iss.block_area)})</div>
+            </td>
+            <td>${UI.renderPriorityBadge(iss.priority)}</td>
+            <td>${UI.renderStatusBadge(iss.status)}</td>
+            <td>
+              ${iss.staff_name ? `<span class="small fw-semibold text-dark"><i class="fa-solid fa-user-gear me-1 text-secondary"></i>${UI.escapeHTML(iss.staff_name)}</span>` : '<span class="text-muted small fst-italic">Unassigned</span>'}
+            </td>
+            <td class="small text-secondary">${UI.formatDate(iss.created_at)}</td>
+            <td class="text-end">
+              <a href="/student/issue-details.html?id=${iss.id}" class="btn btn-sm btn-outline-primary">
+                View &amp; Track
+              </a>
+            </td>
+          </tr>
+        `).join('');
+
+        // Pagination
+        document.getElementById('pagination-info').textContent = `Showing page ${pagination.page} of ${pagination.totalPages} (${pagination.total} total)`;
+        renderPaginationControls(pagination.page, pagination.totalPages);
+
+      } catch (err) {
+        UI.showToast('Failed to fetch issues: ' + err.message, 'danger');
+      }
+    }
+
+    function renderPaginationControls(page, totalPages) {
+      const controls = document.getElementById('pagination-controls');
+      controls.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      // Previous
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+      prevLi.innerHTML = `<a class="page-link" href="#">Prev</a>`;
+      prevLi.onclick = (e) => { e.preventDefault(); if (page > 1) { currentPage--; loadIssues(); } };
+      controls.appendChild(prevLi);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${page === i ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = (e) => { e.preventDefault(); currentPage = i; loadIssues(); };
+        controls.appendChild(li);
+      }
+
+      // Next
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+      nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+      nextLi.onclick = (e) => { e.preventDefault(); if (page < totalPages) { currentPage++; loadIssues(); } };
+      controls.appendChild(nextLi);
+    }
+  </script>
+</body>
+</html>

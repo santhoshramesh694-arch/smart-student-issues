@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Profile | Smart Campus Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="mb-4">
+          <h3 class="fw-bold text-dark mb-1">Staff Technician Profile</h3>
+          <p class="text-secondary small mb-0">Department credentials, operational specialization, and account credentials.</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card-custom p-4 p-sm-5">
+              <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-id-badge me-2 text-primary"></i> Professional Information</h5>
+              <form id="staff-profile-form">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Full Name</label>
+                    <input type="text" class="form-control" id="staff-name" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Staff Email (Read-only)</label>
+                    <input type="email" class="form-control bg-light" id="staff-email" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Employee ID (Read-only)</label>
+                    <input type="text" class="form-control bg-light" id="staff-empid" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Department (Read-only)</label>
+                    <input type="text" class="form-control bg-light" id="staff-dept" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Designation</label>
+                    <input type="text" class="form-control bg-light" id="staff-desig" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Emergency Mobile Contact</label>
+                    <input type="tel" class="form-control" id="staff-phone" placeholder="+1 (555) 0101">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small fw-bold text-secondary">Core Specialization</label>
+                    <input type="text" class="form-control" id="staff-spec" placeholder="e.g. High Voltage Power Distribution & HVAC">
+                  </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                  <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm" id="save-staff-btn">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Save Details
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="card-custom p-4 p-sm-5">
+              <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-lock me-2 text-warning"></i> Change Password</h5>
+              <form id="staff-pw-form">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-secondary">Current Password</label>
+                  <input type="password" class="form-control" id="stf-cur-pw" required placeholder="••••••••">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-secondary">New Password</label>
+                  <input type="password" class="form-control" id="stf-new-pw" required minlength="6" placeholder="••••••••">
+                </div>
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-secondary">Confirm New Password</label>
+                  <input type="password" class="form-control" id="stf-conf-pw" required minlength="6" placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm" id="stf-pw-btn">
+                  Update Security Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    if (Auth.requireAuth(['staff'])) {
+      Components.renderLayout('profile');
+      loadStaffProfile();
+    }
+
+    async function loadStaffProfile() {
+      try {
+        const res = await apiCall('/auth/me');
+        const user = res.data.user;
+
+        document.getElementById('staff-name').value = user.full_name || '';
+        document.getElementById('staff-email').value = user.email || '';
+        document.getElementById('staff-phone').value = user.phone || '';
+
+        if (user.staff_profile) {
+          document.getElementById('staff-empid').value = user.staff_profile.employee_id || '';
+          document.getElementById('staff-dept').value = user.staff_profile.department || '';
+          document.getElementById('staff-desig').value = user.staff_profile.designation || '';
+          document.getElementById('staff-spec').value = user.staff_profile.specialization || '';
+        }
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    document.getElementById('staff-profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('save-staff-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+      try {
+        await apiCall('/auth/profile', {
+          method: 'PUT',
+          body: JSON.stringify({
+            full_name: document.getElementById('staff-name').value.trim(),
+            phone: document.getElementById('staff-phone').value.trim(),
+            specialization: document.getElementById('staff-spec').value.trim()
+          })
+        });
+
+        UI.showToast('Profile updated successfully!', 'success');
+        const current = Auth.getUser();
+        current.full_name = document.getElementById('staff-name').value.trim();
+        Auth.setSession(Auth.getToken(), current);
+        Components.renderTopbar(current);
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save Details';
+      }
+    });
+
+    document.getElementById('staff-pw-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cur = document.getElementById('stf-cur-pw').value;
+      const n1 = document.getElementById('stf-new-pw').value;
+      const n2 = document.getElementById('stf-conf-pw').value;
+
+      if (n1 !== n2) {
+        return UI.showToast('Passwords do not match.', 'warning');
+      }
+
+      const btn = document.getElementById('stf-pw-btn');
+      btn.disabled = true;
+
+      try {
+        await apiCall('/auth/password', {
+          method: 'PUT',
+          body: JSON.stringify({ current_password: cur, new_password: n1 })
+        });
+
+        UI.showToast('Password updated successfully!', 'success');
+        document.getElementById('staff-pw-form').reset();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

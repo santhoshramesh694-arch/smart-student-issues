@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequently Asked Questions | Smart Campus Management System</title>
+  <meta name="description" content="Common questions and answers regarding campus issue reporting, staff assignment, resolution tracking, and account access.">
+  <link rel="canonical" href="http://localhost:5000/faq.html">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <span class="brand-badge"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="fw-bold text-dark fs-5">SmartCampus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link active fw-semibold" href="/faq.html">FAQ</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/contact.html">Contact</a></li>
+        </ul>
+        <a href="/login.html" class="btn btn-outline-primary px-4 fw-semibold">Sign In</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="py-5 bg-white border-bottom text-center">
+    <div class="container">
+      <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase px-3 py-2 rounded-pill">Help &amp; Knowledgebase</span>
+      <h1 class="display-5 fw-bold mt-2">Frequently Asked Questions</h1>
+      <p class="lead text-muted mx-auto" style="max-width: 680px;">
+        Find fast answers to common questions about tracking issues, assigning staff, and submitting satisfaction reviews.
+      </p>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container" style="max-width: 860px;">
+      <div class="accordion" id="faqAccordion">
+        <!-- Q1 -->
+        <div class="accordion-item mb-3 border rounded">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+              Who can report campus maintenance issues?
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Any registered student with a valid campus email and roll number can report grievances. Faculty and administrative personnel can also file issues directly through the portal.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="accordion-item mb-3 border rounded">
+          <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+              How do I track the progress of my reported issue?
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Upon submitting an issue, you receive a unique tracking code (e.g. <code>ISS-2026-0001</code>). In your Student Dashboard, you can click on any issue to view a real-time visual timeline showing assignment, inspection in progress, and resolution notes with photo evidence.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="accordion-item mb-3 border rounded">
+          <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+              What happens when an issue is marked as "Resolved"?
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              The assigned staff member submits resolution details and an optional photo showing the completed repair. The student receives an in-app notification and is prompted to submit a 1 to 5-star rating with optional comments.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="accordion-item mb-3 border rounded">
+          <h2 class="accordion-header" id="headingFour">
+            <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+              What is Campus Problem Analytics?
+            </button>
+          </h2>
+          <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Campus Problem Analytics is an administrative intelligence engine that clusters issues by physical location (Blocks, Labs, Hostels) and category. It alerts campus management to structural patterns—such as recurring plumbing leaks in Block A or Wi-Fi degradation in Block B—enabling proactive preventive maintenance.
+            </div>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="accordion-item border rounded">
+          <h2 class="accordion-header" id="headingFive">
+            <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+              How does the system ensure accountability?
+            </button>
+          </h2>
+          <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Every status transition is immutably stored in the <code>issue_updates</code> table with the user ID, timestamp, and remark. In addition, the central <code>audit_logs</code> table tracks every administrative change, assignment, and deletion.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-4 mt-auto">
+    <div class="container text-center small text-secondary">
+      &copy; 2026 Smart Campus Management System. All Rights Reserved.
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

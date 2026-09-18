@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage All Issues | Admin Console</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div>
+            <h3 class="fw-bold text-dark mb-1">Campus Issue Master Control</h3>
+            <p class="text-secondary small mb-0">Search, filter, assign technicians, adjust priorities, and audit tickets.</p>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card-custom p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+              <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-search"></i></span>
+                <input type="text" class="form-control border-start-0" id="search-input" placeholder="Search code, title, student...">
+              </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="status-filter">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="assigned">Assigned</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="priority-filter">
+                <option value="">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="category-filter">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="zone-filter">
+                <option value="">All Zones</option>
+                <option value="Block A">Block A</option>
+                <option value="Block B">Block B</option>
+                <option value="Hostel Block C">Hostel Block C</option>
+                <option value="Tech Block">Tech Block</option>
+                <option value="North Campus">North Campus</option>
+                <option value="Central Library">Central Library</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-1 text-end">
+              <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Issues Table -->
+        <div class="card-custom">
+          <div class="table-responsive">
+            <table class="table table-custom">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Category</th>
+                  <th>Title &amp; Location</th>
+                  <th>Student</th>
+                  <th>Assigned Staff</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="master-issues-tbody">
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted small">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Loading issues...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="small text-muted" id="pagination-info">Showing 0 records</div>
+            <ul class="pagination pagination-sm mb-0" id="pagination-controls"></ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Dispatch Modal -->
+  <div class="modal fade" id="assignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-user-gear me-2"></i>Assign Technician</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="assign-issue-id">
+          <div class="mb-3">
+            <label for="staff-select" class="form-label small fw-bold text-secondary">Select Staff Member</label>
+            <select class="form-select" id="staff-select"></select>
+          </div>
+          <button type="button" class="btn btn-primary w-100 py-2 fw-semibold" onclick="confirmAssignment()">
+            Dispatch Staff
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Priority Modal -->
+  <div class="modal fade" id="priorityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-warning"><i class="fa-solid fa-flag me-2"></i>Override Priority</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="priority-issue-id">
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary">New Priority Level</label>
+            <select class="form-select" id="priority-override-select">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-warning w-100 py-2 fw-bold" onclick="confirmPriorityChange()">
+            Update Priority
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    let currentPage = 1;
+    let assignModalInst = null;
+    let priorityModalInst = null;
+
+    if (Auth.requireAuth(['admin'])) {
+      Components.renderLayout('issues');
+      loadCategories();
+      loadIssues();
+      setupEvents();
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await apiCall('/categories');
+        const sel = document.getElementById('category-filter');
+        res.data.categories.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.name;
+          sel.appendChild(opt);
+        });
+      } catch (e) {}
+    }
+
+    function setupEvents() {
+      let debounce;
+      document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => { currentPage = 1; loadIssues(); }, 350);
+      });
+      document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadIssues(); });
+      document.getElementById('priority-filter').addEventListener('change', () => { currentPage = 1; loadIssues(); });
+      document.getElementById('category-filter').addEventListener('change', () => { currentPage = 1; loadIssues(); });
+      document.getElementById('zone-filter').addEventListener('change', () => { currentPage = 1; loadIssues(); });
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('status-filter').value = '';
+      document.getElementById('priority-filter').value = '';
+      document.getElementById('category-filter').value = '';
+      document.getElementById('zone-filter').value = '';
+      currentPage = 1;
+      loadIssues();
+    }
+
+    async function loadIssues() {
+      const search = document.getElementById('search-input').value.trim();
+      const status = document.getElementById('status-filter').value;
+      const priority = document.getElementById('priority-filter').value;
+      const category_id = document.getElementById('category-filter').value;
+      const block_area = document.getElementById('zone-filter').value;
+
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 10
+      });
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      if (priority) params.append('priority', priority);
+      if (category_id) params.append('category_id', category_id);
+      if (block_area) params.append('block_area', block_area);
+
+      try {
+        const res = await apiCall(`/issues?${params.toString()}`);
+        const { issues, pagination } = res.data;
+        const tbody = document.getElementById('master-issues-tbody');
+
+        if (!issues || issues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8">${UI.renderEmptyState('No issues found')}</td></tr>`;
+          document.getElementById('pagination-info').textContent = 'Showing 0 records';
+          document.getElementById('pagination-controls').innerHTML = '';
+          return;
+        }
+
+        tbody.innerHTML = issues.map(iss => `
+          <tr>
+            <td>
+              <span class="fw-bold font-monospace text-primary small">${UI.escapeHTML(iss.tracking_code)}</span>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                <i class="fa-solid ${UI.escapeHTML(iss.category_icon || 'fa-wrench')} me-1 text-primary"></i>
+                ${UI.escapeHTML(iss.category_name)}
+              </span>
+            </td>
+            <td>
+              <div class="fw-bold text-dark small text-truncate" style="max-width: 200px;">${UI.escapeHTML(iss.title)}</div>
+              <div class="text-muted small">${UI.escapeHTML(iss.location)} (${UI.escapeHTML(iss.block_area)})</div>
+            </td>
+            <td>
+              <div class="small fw-semibold text-dark">${UI.escapeHTML(iss.student_name)}</div>
+              <div class="text-muted small">${UI.escapeHTML(iss.student_email)}</div>
+            </td>
+            <td>
+              ${iss.staff_name ? `<span class="badge bg-primary-subtle text-primary border">${UI.escapeHTML(iss.staff_name)}</span>` : '<span class="badge bg-warning-subtle text-warning border">Unassigned</span>'}
+            </td>
+            <td>
+              <a href="#" class="text-decoration-none" onclick="openPriorityModal(${iss.id}, '${iss.priority}', event)">
+                ${UI.renderPriorityBadge(iss.priority)}
+              </a>
+            </td>
+            <td>${UI.renderStatusBadge(iss.status)}</td>
+            <td class="text-end">
+              <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                  <li><a class="dropdown-item py-2" href="#" onclick="openAssignModal(${iss.id}, event)"><i class="fa-solid fa-user-plus me-2 text-primary"></i>Assign Staff</a></li>
+                  <li><a class="dropdown-item py-2" href="#" onclick="openPriorityModal(${iss.id}, '${iss.priority}', event)"><i class="fa-solid fa-flag me-2 text-warning"></i>Change Priority</a></li>
+                  <li><a class="dropdown-item py-2" href="#" onclick="changeStatusPrompt(${iss.id}, event)"><i class="fa-solid fa-spinner me-2 text-info"></i>Change Status</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger py-2" href="#" onclick="deleteIssue(${iss.id}, '${iss.tracking_code}', event)"><i class="fa-solid fa-trash me-2"></i>Delete Issue</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        document.getElementById('pagination-info').textContent = `Showing page ${pagination.page} of ${pagination.totalPages} (${pagination.total} total)`;
+        renderPaginationControls(pagination.page, pagination.totalPages);
+
+      } catch (err) {
+        UI.showToast('Failed to fetch master issues: ' + err.message, 'danger');
+      }
+    }
+
+    async function openAssignModal(id, e) {
+      if (e) e.preventDefault();
+      document.getElementById('assign-issue-id').value = id;
+      try {
+        const res = await apiCall('/users/staff/list');
+        const sel = document.getElementById('staff-select');
+        sel.innerHTML = res.data.staff.map(s => `
+          <option value="${s.staff_id}">${UI.escapeHTML(s.full_name)} (${UI.escapeHTML(s.department)}) - Workload: ${s.active_workload}</option>
+        `).join('');
+
+        assignModalInst = new bootstrap.Modal(document.getElementById('assignModal'));
+        assignModalInst.show();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    async function confirmAssignment() {
+      const id = document.getElementById('assign-issue-id').value;
+      const staffId = document.getElementById('staff-select').value;
+      try {
+        await apiCall(`/issues/${id}/assign`, {
+          method: 'PUT',
+          body: JSON.stringify({ staff_id: staffId })
+        });
+        if (assignModalInst) assignModalInst.hide();
+        UI.showToast('Staff dispatched!', 'success');
+        loadIssues();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    function openPriorityModal(id, currentPriority, e) {
+      if (e) e.preventDefault();
+      document.getElementById('priority-issue-id').value = id;
+      document.getElementById('priority-override-select').value = currentPriority;
+      priorityModalInst = new bootstrap.Modal(document.getElementById('priorityModal'));
+      priorityModalInst.show();
+    }
+
+    async function confirmPriorityChange() {
+      const id = document.getElementById('priority-issue-id').value;
+      const priority = document.getElementById('priority-override-select').value;
+      try {
+        await apiCall(`/issues/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ priority })
+        });
+        if (priorityModalInst) priorityModalInst.hide();
+        UI.showToast(`Priority adjusted to ${priority}`, 'success');
+        loadIssues();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    async function changeStatusPrompt(id, e) {
+      if (e) e.preventDefault();
+      const status = prompt('Enter new status (pending, assigned, in_progress, resolved, closed, rejected):');
+      if (!status) return;
+      try {
+        await apiCall(`/issues/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: status.toLowerCase().trim(), remarks: 'Status overridden by Administrator' })
+        });
+        UI.showToast(`Status updated to ${status}`, 'success');
+        loadIssues();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    async function deleteIssue(id, code, e) {
+      if (e) e.preventDefault();
+      if (!confirm(`Are you sure you want to permanently delete issue ${code}? This action will be audited.`)) return;
+      try {
+        await apiCall(`/issues/${id}`, { method: 'DELETE' });
+        UI.showToast(`Issue ${code} deleted`, 'success');
+        loadIssues();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    function renderPaginationControls(page, totalPages) {
+      const controls = document.getElementById('pagination-controls');
+      controls.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+      prevLi.innerHTML = `<a class="page-link" href="#">Prev</a>`;
+      prevLi.onclick = (e) => { e.preventDefault(); if (page > 1) { currentPage--; loadIssues(); } };
+      controls.appendChild(prevLi);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${page === i ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = (e) => { e.preventDefault(); currentPage = i; loadIssues(); };
+        controls.appendChild(li);
+      }
+
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+      nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+      nextLi.onclick = (e) => { e.preventDefault(); if (page < totalPages) { currentPage++; loadIssues(); } };
+      controls.appendChild(nextLi);
+    }
+  </script>
+</body>
+</html>

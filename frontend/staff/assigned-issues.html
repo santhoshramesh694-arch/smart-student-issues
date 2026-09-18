@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assigned Task Queue | Staff Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div>
+            <h3 class="fw-bold text-dark mb-1">Assigned Maintenance Tasks</h3>
+            <p class="text-secondary small mb-0">Track and advance issue statuses through physical diagnostic and repair stages.</p>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card-custom p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+              <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-search"></i></span>
+                <input type="text" class="form-control border-start-0" id="search-input" placeholder="Search tasks by code, room, or title...">
+              </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <select class="form-select" id="status-filter">
+                <option value="">All Statuses</option>
+                <option value="assigned" selected>Assigned (Needs Action)</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="priority-filter">
+                <option value="">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-2 text-end">
+              <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                <i class="fa-solid fa-rotate-left me-1"></i>Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Queue Table -->
+        <div class="card-custom">
+          <div class="table-responsive">
+            <table class="table table-custom">
+              <thead>
+                <tr>
+                  <th>Tracking Code</th>
+                  <th>Category</th>
+                  <th>Defect Description &amp; Location</th>
+                  <th>Reporting Student</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th class="text-end">Lifecycle Actions</th>
+                </tr>
+              </thead>
+              <tbody id="assigned-table-body">
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted small">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Loading assigned tasks...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="small text-muted" id="pagination-info">Showing 0 records</div>
+            <ul class="pagination pagination-sm mb-0" id="pagination-controls"></ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Resolution Modal -->
+  <div class="modal fade" id="resolveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-success"><i class="fa-solid fa-circle-check me-2"></i>Complete &amp; Resolve Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-secondary small mb-3">Document the physical fix applied and attach resolution proof for student and administrative audit.</p>
+
+          <form id="resolve-form">
+            <input type="hidden" id="resolve-issue-id">
+
+            <div class="mb-3">
+              <label for="resolution-notes" class="form-label small fw-bold text-secondary">Resolution Notes &amp; Rectifications *</label>
+              <textarea class="form-control" id="resolution-notes" rows="4" placeholder="Detail parts replaced, technical steps taken, and test results..." required></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-secondary">Upload Completion Photo Proof (Optional)</label>
+              <input type="file" class="form-control" id="resolution-image" accept="image/jpeg,image/png,image/webp">
+              <div class="text-muted small mt-1" style="font-size: 0.725rem;">Visual proof attached to final student audit record.</div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold" id="confirm-resolve-btn">
+              <i class="fa-solid fa-check me-1"></i>Mark Task as Resolved
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    let currentPage = 1;
+    let resolveModalInstance = null;
+
+    if (Auth.requireAuth(['staff'])) {
+      Components.renderLayout('assigned-issues');
+      loadAssignedTasks();
+      setupEvents();
+    }
+
+    function setupEvents() {
+      let debounce;
+      document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => { currentPage = 1; loadAssignedTasks(); }, 350);
+      });
+      document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadAssignedTasks(); });
+      document.getElementById('priority-filter').addEventListener('change', () => { currentPage = 1; loadAssignedTasks(); });
+
+      document.getElementById('resolve-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('resolve-issue-id').value;
+        const notes = document.getElementById('resolution-notes').value.trim();
+        const fileInput = document.getElementById('resolution-image');
+        const btn = document.getElementById('confirm-resolve-btn');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Submitting Resolution...';
+
+        const formData = new FormData();
+        formData.append('resolution_notes', notes);
+        if (fileInput.files && fileInput.files[0]) {
+          formData.append('resolution_image', fileInput.files[0]);
+        }
+
+        try {
+          await apiCall(`/issues/${id}/resolve`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (resolveModalInstance) resolveModalInstance.hide();
+          UI.showToast('Issue marked as resolved!', 'success');
+          loadAssignedTasks();
+        } catch (err) {
+          UI.showToast(err.message || 'Failed to submit resolution', 'danger');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Mark Task as Resolved';
+        }
+      });
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('status-filter').value = '';
+      document.getElementById('priority-filter').value = '';
+      currentPage = 1;
+      loadAssignedTasks();
+    }
+
+    async function loadAssignedTasks() {
+      const search = document.getElementById('search-input').value.trim();
+      const status = document.getElementById('status-filter').value;
+      const priority = document.getElementById('priority-filter').value;
+
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 10
+      });
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      if (priority) params.append('priority', priority);
+
+      try {
+        const res = await apiCall(`/issues?${params.toString()}`);
+        const { issues, pagination } = res.data;
+        const tbody = document.getElementById('assigned-table-body');
+
+        if (!issues || issues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7">${UI.renderEmptyState('No tasks in this view', 'You have no assigned tasks matching current filter parameters.')}</td></tr>`;
+          document.getElementById('pagination-info').textContent = 'Showing 0 records';
+          document.getElementById('pagination-controls').innerHTML = '';
+          return;
+        }
+
+        tbody.innerHTML = issues.map(iss => {
+          let actionButtons = '';
+
+          if (iss.status === 'assigned') {
+            actionButtons = `
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="updateStatus(${iss.id}, 'in_progress', 'Started physical inspection & repair')">
+                <i class="fa-solid fa-play me-1"></i>Start Work
+              </button>
+            `;
+          } else if (iss.status === 'in_progress') {
+            actionButtons = `
+              <button class="btn btn-sm btn-success me-1" onclick="openResolveModal(${iss.id})">
+                <i class="fa-solid fa-check me-1"></i>Resolve
+              </button>
+            `;
+          }
+
+          return `
+            <tr>
+              <td>
+                <span class="fw-bold font-monospace text-primary">${UI.escapeHTML(iss.tracking_code)}</span>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border">
+                  <i class="fa-solid ${UI.escapeHTML(iss.category_icon || 'fa-wrench')} me-1 text-primary"></i>
+                  ${UI.escapeHTML(iss.category_name)}
+                </span>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">${UI.escapeHTML(iss.title)}</div>
+                <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i>${UI.escapeHTML(iss.location)} (${UI.escapeHTML(iss.block_area)})</div>
+              </td>
+              <td>
+                <div class="small fw-semibold text-dark">${UI.escapeHTML(iss.student_name)}</div>
+                <div class="text-muted small">${UI.escapeHTML(iss.student_email)}</div>
+              </td>
+              <td>${UI.renderPriorityBadge(iss.priority)}</td>
+              <td>${UI.renderStatusBadge(iss.status)}</td>
+              <td class="text-end">
+                <div class="d-inline-flex align-items-center">
+                  ${actionButtons}
+                  <a href="/staff/issue-details.html?id=${iss.id}" class="btn btn-sm btn-light border" title="Full Details">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        document.getElementById('pagination-info').textContent = `Showing page ${pagination.page} of ${pagination.totalPages} (${pagination.total} total)`;
+        renderPaginationControls(pagination.page, pagination.totalPages);
+
+      } catch (err) {
+        UI.showToast('Failed to load queue: ' + err.message, 'danger');
+      }
+    }
+
+    async function updateStatus(id, newStatus, remarks) {
+      try {
+        await apiCall(`/issues/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: newStatus, remarks })
+        });
+        UI.showToast(`Issue status changed to ${newStatus}`, 'success');
+        loadAssignedTasks();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    function openResolveModal(id) {
+      document.getElementById('resolve-issue-id').value = id;
+      document.getElementById('resolve-form').reset();
+      resolveModalInstance = new bootstrap.Modal(document.getElementById('resolveModal'));
+      resolveModalInstance.show();
+    }
+
+    function renderPaginationControls(page, totalPages) {
+      const controls = document.getElementById('pagination-controls');
+      controls.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+      prevLi.innerHTML = `<a class="page-link" href="#">Prev</a>`;
+      prevLi.onclick = (e) => { e.preventDefault(); if (page > 1) { currentPage--; loadAssignedTasks(); } };
+      controls.appendChild(prevLi);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${page === i ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = (e) => { e.preventDefault(); currentPage = i; loadAssignedTasks(); };
+        controls.appendChild(li);
+      }
+
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+      nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+      nextLi.onclick = (e) => { e.preventDefault(); if (page < totalPages) { currentPage++; loadAssignedTasks(); } };
+      controls.appendChild(nextLi);
+    }
+  </script>
+</body>
+</html>

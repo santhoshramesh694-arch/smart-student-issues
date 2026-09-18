@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Campus Issue &amp; Resource Management System | University Facility Tracker</title>
+  <meta name="description" content="Next-generation campus issue reporting, facility tracking, staff assignment, and maintenance problem analytics platform for students, faculty, and administrators.">
+  <meta name="keywords" content="smart campus, issue tracker, campus facility, maintenance, university grievance management, student portal">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Smart Campus Issue & Resource Management System">
+  <meta property="og:description" content="Empowering universities with automated maintenance tracking and real-time facility intelligence.">
+  <meta property="og:url" content="http://localhost:5000/">
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Smart Campus Issue & Resource Management System">
+  <meta name="twitter:description" content="Empowering universities with automated maintenance tracking and real-time facility intelligence.">
+  <link rel="canonical" href="http://localhost:5000/">
+
+  <!-- Bootstrap 5 CSS & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <span class="brand-badge"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="fw-bold text-dark fs-5">SmartCampus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active fw-semibold" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/faq.html">FAQ</a></li>
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/contact.html">Contact</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2" id="nav-auth-buttons">
+          <a href="/login.html" class="btn btn-outline-primary px-4 fw-semibold">Sign In</a>
+          <a href="/register.html" class="btn btn-primary px-4 fw-semibold shadow-sm">Student Sign Up</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section text-center">
+    <div class="container position-relative" style="z-index: 10;">
+      <div class="hero-stats-badge">
+        <i class="fa-solid fa-bolt-lightning text-warning"></i> 24/7 Smart Campus Governance &amp; Facility Tracking
+      </div>
+      <h1 class="display-4 fw-black mb-3 text-white">
+        Streamlined Campus Maintenance,<br><span class="text-primary-light" style="color: #60a5fa;">Intelligent Problem Analytics.</span>
+      </h1>
+      <p class="lead text-secondary-emphasis mb-4 mx-auto text-light" style="max-width: 680px; opacity: 0.9;">
+        Empowering students to report electrical, plumbing, Wi-Fi, and lab malfunctions in seconds while staff resolve tasks with end-to-end transparency.
+      </p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="/register.html" class="btn btn-primary btn-lg px-4 py-3 fw-bold shadow">
+          <i class="fa-solid fa-plus-circle me-2"></i>Report Campus Issue
+        </a>
+        <a href="/login.html" class="btn btn-outline-light btn-lg px-4 py-3 fw-bold">
+          <i class="fa-solid fa-user-shield me-2"></i>Access Portal
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Key Metrics Counter Section -->
+  <section class="py-4 bg-white border-bottom shadow-sm">
+    <div class="container">
+      <div class="row text-center g-4">
+        <div class="col-6 col-md-3">
+          <div class="display-6 fw-bold text-primary">98.4%</div>
+          <div class="text-muted small fw-semibold text-uppercase mt-1">Resolution SLA</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="display-6 fw-bold text-success">&lt; 4 Hrs</div>
+          <div class="text-muted small fw-semibold text-uppercase mt-1">Avg Turnaround</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="display-6 fw-bold text-dark">11</div>
+          <div class="text-muted small fw-semibold text-uppercase mt-1">Campus Categories</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="display-6 fw-bold text-warning">4.9 ★</div>
+          <div class="text-muted small fw-semibold text-uppercase mt-1">Student Satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="py-5 bg-light">
+    <div class="container py-4">
+      <div class="text-center max-w-xl mx-auto mb-5">
+        <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase px-3 py-2 rounded-pill">Lifecycle Workflow</span>
+        <h2 class="display-6 fw-bold mt-2">How Smart Campus Operates</h2>
+        <p class="text-muted">A fully transparent 4-stage issue tracking process connecting students, technicians, and campus leadership.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="feature-card text-center">
+            <div class="feature-icon-wrapper bg-primary-subtle text-primary mx-auto">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <h5 class="fw-bold">1. File Grievance</h5>
+            <p class="text-muted small">Student snaps a photo, sets priority and location, and receives an instant tracking code.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-card text-center">
+            <div class="feature-icon-wrapper bg-warning-subtle text-warning mx-auto">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <h5 class="fw-bold">2. Smart Assignment</h5>
+            <p class="text-muted small">Administrators route tasks to electrical, IT, or plumbing technicians based on active workloads.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-card text-center">
+            <div class="feature-icon-wrapper bg-info-subtle text-info mx-auto">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <h5 class="fw-bold">3. Physical Fix & Proof</h5>
+            <p class="text-muted small">Staff inspects, repairs the breakdown, and uploads resolution notes and completion photos.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-card text-center">
+            <div class="feature-icon-wrapper bg-success-subtle text-success mx-auto">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <h5 class="fw-bold">4. Rate & Analytics</h5>
+            <p class="text-muted small">Students grade service quality while campus analytics flags recurring infrastructure hotspots.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Pillars Grid -->
+  <section class="py-5 bg-white">
+    <div class="container py-4">
+      <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+          <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase px-3 py-2 rounded-pill">Campus Problem Analytics</span>
+          <h2 class="display-6 fw-bold mt-2">Data-Driven Campus Infrastructure</h2>
+          <p class="text-muted">
+            Move beyond static reactive ticketing. Our built-in Campus Problem Analytics engine aggregates recurring breakdowns across Blocks, Labs, and Hostels to pinpoint structural maintenance deficits before exams or events.
+          </p>
+          <ul class="list-unstyled">
+            <li class="d-flex align-items-center gap-2 mb-2"><i class="fa-solid fa-circle-check text-success"></i> Real-time hotspot detection by block area and category</li>
+            <li class="d-flex align-items-center gap-2 mb-2"><i class="fa-solid fa-circle-check text-success"></i> Workload & turnaround tracking across staff departments</li>
+            <li class="d-flex align-items-center gap-2 mb-2"><i class="fa-solid fa-circle-check text-success"></i> Granular audit trail for administrative transparency</li>
+          </ul>
+        </div>
+        <div class="col-lg-6 text-center">
+          <div class="p-4 bg-light rounded-4 border shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-bold small text-muted">SAMPLE HOTSPOT INTELLIGENCE</span>
+              <span class="badge bg-danger">Critical Hotspot</span>
+            </div>
+            <div class="card border-0 shadow-sm p-3 mb-3 text-start">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold text-dark">Computer Lab 2 (Tech Block)</span>
+                <span class="text-danger fw-bold">6 Issues / Week</span>
+              </div>
+              <div class="text-muted small">High concentration of Desktop Hardware & Power Outages</div>
+            </div>
+            <div class="card border-0 shadow-sm p-3 text-start">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold text-dark">Block B (Girls Hostel)</span>
+                <span class="text-warning fw-bold">5 Issues / Week</span>
+              </div>
+              <div class="text-muted small">Frequent Wi-Fi Access Point Drops & Packet Loss</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="brand-badge"><i class="fa-solid fa-graduation-cap"></i></span>
+            <span class="fw-bold text-white fs-5">SmartCampus</span>
+          </div>
+          <p class="small text-secondary">
+            A comprehensive, production-grade Campus Issue & Resource Management web application. Built for academic excellence, infrastructure transparency, and rapid facility resolution.
+          </p>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-bold mb-3">Portals</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2"><a href="/login.html">Student Login</a></li>
+            <li class="mb-2"><a href="/login.html">Staff Workspace</a></li>
+            <li class="mb-2"><a href="/login.html">Admin Console</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-bold mb-3">Company</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2"><a href="/about.html">About Initiative</a></li>
+            <li class="mb-2"><a href="/services.html">Campus Services</a></li>
+            <li class="mb-2"><a href="/faq.html">Help &amp; FAQ</a></li>
+            <li class="mb-2"><a href="/contact.html">Emergency Contacts</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white fw-bold mb-3">Campus Facility Support</h6>
+          <p class="small text-secondary mb-2"><i class="fa-solid fa-location-dot me-2"></i> Facilities Maintenance Central Office, Block A</p>
+          <p class="small text-secondary mb-2"><i class="fa-solid fa-phone me-2"></i> Helpline: +1 (800) 555-CAMPUS</p>
+          <p class="small text-secondary"><i class="fa-solid fa-envelope me-2"></i> support@smartcampus.edu</p>
+        </div>
+      </div>
+      <div class="border-top border-secondary pt-4 mt-4 text-center small text-secondary">
+        &copy; 2026 Smart Campus Management System. All Rights Reserved. Engineered for Final Year Portfolio &amp; Production Deployment.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // If already logged in, update topbar to dashboard
+    const user = Auth.getUser();
+    if (user) {
+      const authBtns = document.getElementById('nav-auth-buttons');
+      const targetDashboard = user.role === 'admin' ? '/admin/dashboard.html' : (user.role === 'staff' ? '/staff/dashboard.html' : '/student/dashboard.html');
+      authBtns.innerHTML = `
+        <a href="${targetDashboard}" class="btn btn-primary px-4 fw-semibold shadow-sm">
+          <i class="fa-solid fa-gauge-high me-1"></i> Go to Dashboard
+        </a>
+      `;
+    }
+  </script>
+</body>
+</html>

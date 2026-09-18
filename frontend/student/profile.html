@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile | Smart Campus Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="mb-4">
+          <h3 class="fw-bold text-dark mb-1">My Student Profile</h3>
+          <p class="text-secondary small mb-0">Update contact telephone, hostel room details, and manage security settings.</p>
+        </div>
+
+        <div class="row g-4">
+          <!-- Profile Card -->
+          <div class="col-lg-7">
+            <div class="card-custom p-4 p-sm-5">
+              <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-address-card me-2 text-primary"></i> Personal &amp; Campus Details</h5>
+              <form id="profile-form">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Full Name</label>
+                    <input type="text" class="form-control" id="profile-name" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Campus Email (Read-only)</label>
+                    <input type="email" class="form-control bg-light" id="profile-email" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Student Roll / ID (Read-only)</label>
+                    <input type="text" class="form-control bg-light" id="profile-roll" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Department (Read-only)</label>
+                    <input type="text" class="form-control bg-light" id="profile-dept" readonly disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Semester</label>
+                    <input type="text" class="form-control" id="profile-sem" placeholder="e.g. 6th Semester">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Contact Phone</label>
+                    <input type="tel" class="form-control" id="profile-phone" placeholder="+1 (555) 0199">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Hostel Residence Block</label>
+                    <input type="text" class="form-control" id="profile-block" placeholder="Block A (Boys Hostel)">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary">Room / Flat Number</label>
+                    <input type="text" class="form-control" id="profile-room" placeholder="A-204">
+                  </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                  <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm" id="save-profile-btn">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Password Changer -->
+          <div class="col-lg-5">
+            <div class="card-custom p-4 p-sm-5">
+              <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-lock me-2 text-warning"></i> Change Password</h5>
+              <form id="password-form">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-secondary">Current Password</label>
+                  <input type="password" class="form-control" id="current-password" required placeholder="••••••••">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-secondary">New Password (Min 6 chars)</label>
+                  <input type="password" class="form-control" id="new-password" required minlength="6" placeholder="••••••••">
+                </div>
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-secondary">Confirm New Password</label>
+                  <input type="password" class="form-control" id="confirm-password" required minlength="6" placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm" id="pw-btn">
+                  Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    if (Auth.requireAuth(['student'])) {
+      Components.renderLayout('profile');
+      loadProfile();
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await apiCall('/auth/me');
+        const user = res.data.user;
+
+        document.getElementById('profile-name').value = user.full_name || '';
+        document.getElementById('profile-email').value = user.email || '';
+        document.getElementById('profile-phone').value = user.phone || '';
+
+        if (user.student_profile) {
+          document.getElementById('profile-roll').value = user.student_profile.roll_number || '';
+          document.getElementById('profile-dept').value = user.student_profile.department || '';
+          document.getElementById('profile-sem').value = user.student_profile.semester || '';
+          document.getElementById('profile-block').value = user.student_profile.hostel_block || '';
+          document.getElementById('profile-room').value = user.student_profile.room_number || '';
+        }
+      } catch (err) {
+        UI.showToast('Failed to load profile details: ' + err.message, 'danger');
+      }
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('save-profile-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+      try {
+        await apiCall('/auth/profile', {
+          method: 'PUT',
+          body: JSON.stringify({
+            full_name: document.getElementById('profile-name').value.trim(),
+            phone: document.getElementById('profile-phone').value.trim(),
+            semester: document.getElementById('profile-sem').value.trim(),
+            hostel_block: document.getElementById('profile-block').value.trim(),
+            room_number: document.getElementById('profile-room').value.trim()
+          })
+        });
+
+        UI.showToast('Profile updated successfully!', 'success');
+        // Update local session
+        const current = Auth.getUser();
+        current.full_name = document.getElementById('profile-name').value.trim();
+        Auth.setSession(Auth.getToken(), current);
+        Components.renderTopbar(current);
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save Changes';
+      }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const curPw = document.getElementById('current-password').value;
+      const newPw = document.getElementById('new-password').value;
+      const confPw = document.getElementById('confirm-password').value;
+
+      if (newPw !== confPw) {
+        return UI.showToast('New passwords do not match.', 'warning');
+      }
+
+      const btn = document.getElementById('pw-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+      try {
+        await apiCall('/auth/password', {
+          method: 'PUT',
+          body: JSON.stringify({
+            current_password: curPw,
+            new_password: newPw
+          })
+        });
+
+        UI.showToast('Password changed successfully!', 'success');
+        document.getElementById('password-form').reset();
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password';
+      }
+    });
+  </script>
+</body>
+</html>

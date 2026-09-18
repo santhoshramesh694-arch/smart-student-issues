@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /about.html
+Allow: /services.html
+Allow: /faq.html
+Allow: /contact.html
+Allow: /login.html
+Allow: /register.html
+
+# Disallow private user portals from search indexing
+Disallow: /student/
+Disallow: /staff/
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: http://localhost:5000/sitemap.xml

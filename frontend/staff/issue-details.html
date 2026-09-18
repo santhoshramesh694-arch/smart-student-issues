@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspect &amp; Resolve Task | Staff Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <main class="p-4 p-lg-5">
+        <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <a href="/staff/assigned-issues.html" class="text-secondary small text-decoration-none">
+              <i class="fa-solid fa-arrow-left me-1"></i>Back to Assigned Queue
+            </a>
+            <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
+              <h3 class="fw-bold text-dark mb-0" id="task-tracking-code">Loading Task...</h3>
+              <span id="task-status-badge"></span>
+              <span id="task-priority-badge"></span>
+            </div>
+          </div>
+          <div id="task-action-buttons"></div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Left Column: Defect Information -->
+          <div class="col-lg-7">
+            <div class="card-custom p-4 mb-4">
+              <h5 class="fw-bold text-dark mb-3" id="task-title">...</h5>
+              <p class="text-secondary mb-4" id="task-description" style="white-space: pre-line;">...</p>
+
+              <div class="row g-3 p-3 bg-light rounded border small mb-4">
+                <div class="col-6 col-md-3">
+                  <div class="text-muted">Category</div>
+                  <div class="fw-bold text-dark" id="task-category">-</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="text-muted">Campus Zone</div>
+                  <div class="fw-bold text-dark" id="task-block">-</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="text-muted">Location</div>
+                  <div class="fw-bold text-dark" id="task-location">-</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="text-muted">Reported Date</div>
+                  <div class="fw-bold text-dark" id="task-created">-</div>
+                </div>
+              </div>
+
+              <!-- Student Photo Evidence -->
+              <div id="task-photo-sec" class="mb-4 d-none">
+                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-camera me-1 text-primary"></i> Student Photo Evidence</h6>
+                <div class="border rounded p-2 bg-light text-center">
+                  <img id="task-photo-img" src="#" alt="Defect Evidence" class="img-fluid rounded" style="max-height: 320px;">
+                </div>
+              </div>
+
+              <!-- Resolution Details -->
+              <div id="task-resolved-sec" class="p-4 bg-success-subtle rounded border border-success-subtle d-none">
+                <h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-circle-check me-1"></i> Resolution Notes Logged</h6>
+                <p class="text-dark small mb-3" id="task-notes-text">...</p>
+                <div id="task-res-photo-wrapper" class="d-none">
+                  <img id="task-res-photo-img" src="#" alt="Resolution Proof" class="img-fluid rounded border" style="max-height: 250px;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Reporting Student & Lifecycle Timeline -->
+          <div class="col-lg-5">
+            <!-- Student Contact Card -->
+            <div class="card-custom p-4 mb-4">
+              <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-graduate me-2 text-primary"></i> Reporting Student</h6>
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-light text-primary border fw-bold d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; font-size: 1.1rem;">
+                  <span id="std-avatar-char">S</span>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark" id="std-name">-</div>
+                  <div class="text-secondary small" id="std-dept-roll">-</div>
+                  <div class="text-muted small mt-1">
+                    <i class="fa-solid fa-phone me-1"></i><span id="std-phone">-</span>
+                  </div>
+                  <div class="text-muted small">
+                    <i class="fa-solid fa-bed me-1"></i><span id="std-hostel">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card-custom p-4">
+              <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-timeline me-2 text-primary"></i> State Transition History</h6>
+              <div class="timeline-stepper" id="task-timeline">
+                <div class="text-muted small">Loading timeline...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Resolve Modal -->
+  <div class="modal fade" id="staffResolveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-success"><i class="fa-solid fa-circle-check me-2"></i>Complete Task Resolution</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="staff-resolve-form">
+            <div class="mb-3">
+              <label for="modal-notes" class="form-label small fw-bold text-secondary">Resolution Notes &amp; Rectification Steps *</label>
+              <textarea class="form-control" id="modal-notes" rows="4" placeholder="Detail component replacements, diagnostic results, and safety checks..." required></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-secondary">Completion Photo Proof (Optional)</label>
+              <input type="file" class="form-control" id="modal-photo" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold" id="modal-submit-btn">
+              Submit &amp; Mark Resolved
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/components.js"></script>
+  <script>
+    let taskId = null;
+    let modalInstance = null;
+
+    if (Auth.requireAuth(['staff'])) {
+      Components.renderLayout('assigned-issues');
+      const params = new URLSearchParams(window.location.search);
+      taskId = params.get('id');
+      if (!taskId) {
+        window.location.href = '/staff/assigned-issues.html';
+      } else {
+        loadTaskDetails(taskId);
+      }
+    }
+
+    async function loadTaskDetails(id) {
+      try {
+        const res = await apiCall(`/issues/${id}`);
+        const { issue, timeline } = res.data;
+
+        document.getElementById('task-tracking-code').textContent = issue.tracking_code;
+        document.getElementById('task-status-badge').innerHTML = UI.renderStatusBadge(issue.status);
+        document.getElementById('task-priority-badge').innerHTML = UI.renderPriorityBadge(issue.priority);
+
+        document.getElementById('task-title').textContent = issue.title;
+        document.getElementById('task-description').textContent = issue.description;
+        document.getElementById('task-category').textContent = issue.category_name;
+        document.getElementById('task-block').textContent = issue.block_area;
+        document.getElementById('task-location').textContent = issue.location;
+        document.getElementById('task-created').textContent = UI.formatDate(issue.created_at);
+
+        if (issue.issue_image_url) {
+          document.getElementById('task-photo-sec').classList.remove('d-none');
+          document.getElementById('task-photo-img').src = issue.issue_image_url;
+        }
+
+        if (issue.status === 'resolved' || issue.status === 'closed') {
+          document.getElementById('task-resolved-sec').classList.remove('d-none');
+          document.getElementById('task-notes-text').textContent = issue.resolution_notes || 'Resolved';
+          if (issue.resolution_image_url) {
+            document.getElementById('task-res-photo-wrapper').classList.remove('d-none');
+            document.getElementById('task-res-photo-img').src = issue.resolution_image_url;
+          }
+        }
+
+        // Student Box
+        document.getElementById('std-name').textContent = issue.student_name || 'Student';
+        document.getElementById('std-avatar-char').textContent = (issue.student_name || 'S').charAt(0);
+        document.getElementById('std-dept-roll').textContent = `${issue.student_roll_number || ''} • ${issue.student_department || ''}`;
+        document.getElementById('std-phone').textContent = issue.student_phone || 'No phone recorded';
+        document.getElementById('std-hostel').textContent = `${issue.student_hostel_block || ''} Room ${issue.student_room_number || ''}`;
+
+        // Timeline
+        const timelineBox = document.getElementById('task-timeline');
+        timelineBox.innerHTML = timeline.map(step => `
+          <div class="timeline-step-item">
+            <div class="timeline-step-dot"></div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-dark small text-capitalize">${step.new_status.replace('_', ' ')}</span>
+              <span class="text-muted" style="font-size: 0.725rem;">${UI.formatDateTime(step.created_at)}</span>
+            </div>
+            <div class="text-secondary small mt-1">${UI.escapeHTML(step.remarks || '')}</div>
+            <div class="text-muted" style="font-size: 0.725rem;">By: ${UI.escapeHTML(step.updated_by_name)}</div>
+          </div>
+        `).join('');
+
+        // Action Buttons
+        const actionBox = document.getElementById('task-action-buttons');
+        if (issue.status === 'assigned') {
+          actionBox.innerHTML = `
+            <button class="btn btn-primary px-4 fw-semibold" onclick="startWork(${issue.id})">
+              <i class="fa-solid fa-play me-2"></i>Start Work (Set In Progress)
+            </button>
+          `;
+        } else if (issue.status === 'in_progress') {
+          actionBox.innerHTML = `
+            <button class="btn btn-success px-4 fw-semibold" onclick="openModal()">
+              <i class="fa-solid fa-check me-2"></i>Complete &amp; Mark Resolved
+            </button>
+          `;
+        } else {
+          actionBox.innerHTML = '';
+        }
+
+      } catch (err) {
+        UI.showToast('Failed to load task: ' + err.message, 'danger');
+      }
+    }
+
+    async function startWork(id) {
+      try {
+        await apiCall(`/issues/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: 'in_progress', remarks: 'Technician commenced physical inspection & diagnostics' })
+        });
+        UI.showToast('Status updated to In Progress', 'success');
+        loadTaskDetails(id);
+      } catch (err) {
+        UI.showToast(err.message, 'danger');
+      }
+    }
+
+    function openModal() {
+      modalInstance = new bootstrap.Modal(document.getElementById('staffResolveModal'));
+      modalInstance.show();
+    }
+
+    document.getElementById('staff-resolve-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const notes = document.getElementById('modal-notes').value.trim();
+      const fileInput = document.getElementById('modal-photo');
+      const btn = document.getElementById('modal-submit-btn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+
+      const formData = new FormData();
+      formData.append('resolution_notes', notes);
+      if (fileInput.files && fileInput.files[0]) {
+        formData.append('resolution_image', fileInput.files[0]);
+      }
+
+      try {
+        await apiCall(`/issues/${taskId}/resolve`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (modalInstance) modalInstance.hide();
+        UI.showToast('Task marked as resolved successfully!', 'success');
+        loadTaskDetails(taskId);
+      } catch (err) {
+        UI.showToast(err.message || 'Failed to submit resolution', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit & Mark Resolved';
+      }
+    });
+  </script>
+</body>
+</html>
